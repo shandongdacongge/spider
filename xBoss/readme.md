@@ -5,12 +5,12 @@
 
 # 涉及技术
 本爬取方案最终通过Python实现了完全自动化爬取职位信息列表页，并存储到一个txt文件中(需要的可自行扩展数据库实现)，为了简单起见未使用多线程，使用的技术有：
-- python
+- python3
 - requests 
 - execjs 执行js脚本
 - re 正则表达式
 - BeautifulSoup 解析列表页面提取职位信息
-- jsbeautify 为增加可读性，对加密js进行格式化处理
+- jsbeautify.js 为增加可读性，对加密js进行格式化处理
 
 # 爬取方案流程
 爬取方案的思路为
@@ -23,6 +23,20 @@
 7. 解析页数，提取职位信息追加到result.txt中
 8. 解析页面响应的头部信息，获取seed name ts
 9. 根据seed name ts 再次 从第二步开始重复 
+
+# 调用代码案例
+```python
+# 对指定的页面进行遍历翻页，将结果写入指定文件
+provider={}
+path="C:/boss/"  # 需要确保jsbeautify.js在该目录下，中间过程文件、最终文件都在该目录下
+for i in range(10):
+    url="https://www.zhipin.com/c101280600/?query=python&page="+str(i)+"&ka=page-"+str(i)
+    text=bossSpider(url,provider)
+    result=extractJobInfo(text)
+    resultFileName=path+"result.txt"
+    with open(resultFileName,'a',encoding='UTF-8') as f:
+        f.write(result)
+```
 
 # 网站正常访问流程
 1. 某Boss网站在访问页面时都需要携带一个 __zp_stoken__=xxxxxx 这样的cookie
@@ -77,3 +91,10 @@
 - switch扁平化 原始js中很多switch case语句用来控制函数的执行流程，而判断的内容来源于某个数组，这个数组又是根据常量池中的某个常量按照|进行分割形成的，其实switch最终执行流程是固定，而按照这个数据对switch case进行函数顺序编排及替换就成为 switch扁平化
 
 # 相关代码文件说明
+- 分析过程文件
+    - test.html 进行本地调试使用的页面
+    - temp.js 作者对3d0a2109.js进行最简化处理后的核心代码，进行了详细标注
+    - 3d0a2109.js 作者以这个js为案例代码进行逆向分析处理，python涉及行数的都是以这个原始js为蓝本为基础的
+    - temp-3d0a2109.js   temp-3d0a2109-v2.js  temp-3d0a2109-v3.js 逆向分析的中间过程文件
+- jsbeautify.js python运行时需要调用的js，用于js代码格式化
+- XBossSpider.py 最终python代码
